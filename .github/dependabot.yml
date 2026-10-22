@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Monthly npm dependency check: minor/patch batched into one PR,
+  # major versions get their own PR.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  # Keep GitHub Actions versions current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

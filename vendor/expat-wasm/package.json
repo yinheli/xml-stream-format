@@ -1,0 +1,25 @@
+{
+  "name": "expat-wasm",
+  "version": "4.0.6",
+  "description": "Evented parser based on a WASM-compiled version of expat",
+  "main": "lib/index.js",
+  "type": "module",
+  "types": "types/index.d.ts",
+  "files": [
+    "lib/*",
+    "types/*"
+  ],
+  "repository": "hildjj/expat-wasm",
+  "keywords": [
+    "xml",
+    "parse",
+    "expat",
+    "wasm"
+  ],
+  "author": "Joe Hildebrand <joe-github@cursive.net>",
+  "license": "MIT",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=20"
+  }
+}

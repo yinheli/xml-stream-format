@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Validate only (no actual publish)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Build, test & publish to npm
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write # required for npm provenance / trusted publishing (OIDC)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing requires npm >= 11.5.1; Node 22 bundles an older npm.
+      # One-time setup: on npmjs.com, package settings -> Trusted Publisher ->
+      # repo yinheli/xml-stream-format, workflow release.yml.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@^11.5.1
+
+      - name: Install dependencies
+        run: npm ci --include=dev --ignore-scripts
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      # Refuse to publish if the release tag does not match package.json.
+      - name: Verify tag matches package.json version
+        if: github.event_name == 'release'
+        run: |
+          node -e 'const { version } = require("./package.json"); if ("v" + version !== process.env.GITHUB_REF_NAME) { console.error(`tag ${process.env.GITHUB_REF_NAME} != package.json v${version}`); process.exit(1); }'
+
+      - name: Pack preview
+        run: npm pack --dry-run
+
+      # Manual dispatch defaults to a dry run to validate the pipeline.
+      - name: Publish (dry run)
+        if: github.event_name == 'workflow_dispatch' && inputs.dry-run
+        run: npm publish --dry-run
+
+      - name: Publish to npm
+        if: github.event_name == 'release'
+        run: npm publish --provenance --access public

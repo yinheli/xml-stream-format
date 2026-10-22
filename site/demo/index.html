@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo · xml-stream-format</title>
+    <meta
+      name="description"
+      content="Open a multi-gigabyte XML file in your browser. Streaming, demand-driven parsing with the xml-stream-format library; nothing is uploaded."
+    />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body class="app empty">
+    <header class="topbar">
+      <a class="brand" href="../"><span class="mark">&lt;/&gt;</span> xml-stream-format</a>
+      <span class="crumb">/ demo</span>
+      <span class="spacer"></span>
+      <button type="button" data-action="open">Open XML…</button>
+      <button type="button" class="ghost" data-action="sample"><span class="wide">Generate sample</span><span class="narrow">Sample</span></button>
+      <a class="ghost button" href="https://github.com/yinheli/xml-stream-format">GitHub</a>
+    </header>
+
+    <div class="status" id="status"></div>
+
+    <main class="workspace">
+      <div class="viewport" id="viewport">
+        <div class="rows" id="rows"></div>
+        <div class="intro" id="intro">
+          <p class="eyebrow">browser demo</p>
+          <h1>Drop an XML file of any size.</h1>
+          <p>
+            It is parsed in a Web Worker by the same library code that powers the CLI:
+            strict decoding, Expat compiled to WASM and the same ingest pipeline. Reading is
+            demand-driven, so only what fills the screen gets parsed.
+            <b>Nothing leaves your machine.</b>
+          </p>
+          <p class="cta">
+            <button type="button" data-action="open">Open XML…</button>
+            <button type="button" class="ghost" data-action="sample">Generate a 96 MiB sample</button>
+          </p>
+          <ul class="ticks">
+            <li>first screen before EOF, even for multi-GB files</li>
+            <li>folding, keyboard &amp; mouse navigation like the terminal browser</li>
+            <li>fuzzy name search, XPath 3.1, statistics</li>
+            <li>copy paths or formatted subtrees · export the whole file, formatted</li>
+          </ul>
+          <p class="muted">Press <kbd>?</kbd> for keys once a file is open.</p>
+        </div>
+      </div>
+      <aside class="panel" id="panel" hidden></aside>
+    </main>
+
+    <div class="pathbar">
+      <span class="path" id="path"></span>
+      <nav class="tools" aria-label="Tools">
+        <button type="button" class="ghost small" data-key="/" title="Fuzzy name search (/)">Search</button>
+        <button type="button" class="ghost small" data-key=":" title="XPath 3.1 (:)">XPath</button>
+        <button type="button" class="ghost small" data-key="y" title="Copy path, XPath or subtree (y)">Copy</button>
+        <button type="button" class="ghost small" data-key="e" title="Export formatted XML (e)">Export</button>
+        <button type="button" class="ghost small" data-key="o" title="Statistics (o)">Stats</button>
+        <button type="button" class="ghost small" data-key="?" title="Keys (?)">Help</button>
+      </nav>
+    </div>
+    <form class="prompt" id="prompt" hidden autocomplete="off">
+      <span class="prompt-label" id="prompt-label">/</span>
+      <input id="prompt-input" spellcheck="false" />
+      <input id="prompt-ns" spellcheck="false" placeholder="namespaces: p=urn:example …" hidden />
+    </form>
+    <footer class="hints">
+      <span><kbd>j</kbd><kbd>k</kbd> move</span>
+      <span><kbd>h</kbd><kbd>l</kbd> fold</span>
+      <span><kbd>gg</kbd><kbd>G</kbd> ends</span>
+      <span><kbd>0</kbd>–<kbd>9</kbd> levels</span>
+      <span><kbd>/</kbd> search</span>
+      <span><kbd>:</kbd> XPath</span>
+      <span><kbd>y</kbd> copy</span>
+      <span><kbd>e</kbd> export</span>
+      <span><kbd>o</kbd> stats</span>
+      <span><kbd>?</kbd> help</span>
+    </footer>
+
+    <dialog id="dialog"></dialog>
+    <div class="toasts" id="toast"></div>
+    <div class="dropzone">Drop to open — the file stays local</div>
+    <input type="file" id="file" hidden />
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
