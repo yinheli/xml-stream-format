@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>xml-stream-format — format, query and browse XML larger than memory</title>
+    <meta
+      name="description"
+      content="Strict XML 1.0 formatter, XPath extractor and terminal browser for Node.js. Bounded memory via a disk-assisted event tape: 1 GiB formats at ~165 MiB peak RSS."
+    />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body class="site">
+    <header class="topbar">
+      <a class="brand" href="./"><span class="mark">&lt;/&gt;</span> xml-stream-format</a>
+      <span class="spacer"></span>
+      <a href="./demo/">Demo</a>
+      <a href="https://github.com/yinheli/xml-stream-format#readme">Docs</a>
+      <a href="https://www.npmjs.com/package/xml-stream-format">npm</a>
+      <a href="https://github.com/yinheli/xml-stream-format">GitHub</a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Node.js · ESM · MIT</p>
+        <h1>Format, query and browse XML that doesn't fit in memory.</h1>
+        <p class="lede">
+          A strict XML&nbsp;1.0 formatter, XPath extractor and terminal browser. Events stream
+          through a temporary disk tape — no DOM, no whole-document string — so memory stays flat
+          while files grow to gigabytes.
+        </p>
+        <div class="cta">
+          <a class="button" href="./demo/">Open a file in the browser demo →</a>
+          <code class="install">npm i xml-stream-format</code>
+        </div>
+      </section>
+
+      <section class="terminal" aria-label="Terminal browser preview">
+        <div class="terminal-bar"><i></i><i></i><i></i><span>xml-stream-format view orders-1.4GB.xml</span></div>
+<pre><span class="c-gray">  </span><span class="c-magenta">&lt;?xml version="1.0"?&gt;</span>
+<span class="c-gray">▾ </span><span class="c-cyan">&lt;</span><span class="c-yellow">feed</span> <span class="c-yellow">xmlns</span><span class="c-gray">=</span><span class="c-green">"urn:example:feed"</span><span class="c-cyan">&gt;</span>
+<span class="c-gray">▸ </span>  <span class="c-cyan">&lt;</span><span class="c-yellow">meta</span><span class="c-cyan">&gt;</span><span class="muted"> … </span><span class="c-cyan">&lt;/</span><span class="c-yellow">meta</span><span class="c-cyan">&gt;</span>
+<span class="c-gray">▾ </span>  <span class="c-cyan">&lt;</span><span class="c-yellow">order</span> <span class="c-yellow">id</span><span class="c-gray">=</span><span class="c-green">"o-00000001"</span> <span class="c-yellow">status</span><span class="c-gray">=</span><span class="c-green">"shipped"</span><span class="c-cyan">&gt;</span>
+<span class="cursor-line"><span class="c-gray">  </span>    <span class="c-cyan">&lt;</span><span class="c-yellow">name</span><span class="c-cyan">&gt;</span>Ada Lovelace<span class="c-cyan">&lt;/</span><span class="c-yellow">name</span><span class="c-cyan">&gt;</span></span>
+<span class="c-gray">  </span>    <span class="c-cyan">&lt;</span><span class="c-yellow">note</span><span class="c-cyan">&gt;</span><span class="c-green">&lt;![CDATA[Leave at &lt;door&gt;]]&gt;</span><span class="c-cyan">&lt;/</span><span class="c-yellow">note</span><span class="c-cyan">&gt;</span>
+<span class="c-gray">  </span>  <span class="c-cyan">&lt;/</span><span class="c-yellow">order</span><span class="c-cyan">&gt;</span>
+<span class="c-gray">▸ </span>  <span class="c-cyan">&lt;</span><span class="c-yellow">order</span> <span class="c-yellow">id</span><span class="c-gray">=</span><span class="c-green">"o-00000002"</span><span class="c-cyan">&gt;</span><span class="muted"> … [incomplete]</span>
+<span class="muted">/feed/order[1]/name                  paused · loaded prefix (not fully validated)</span></pre>
+      </section>
+
+      <section class="features">
+        <article>
+          <h3>Bounded memory</h3>
+          <p>Validated events go to a private on-disk tape and are replayed. A slow consumer pauses reads; temp data is removed on finish, error or abort.</p>
+        </article>
+        <article>
+          <h3>Strict by default</h3>
+          <p>XML 1.0 via Expat (WASM). DOCTYPE and entities are rejected — no network or file loading. Strict UTF-8/16, ASCII and Latin-1 decoding.</p>
+        </article>
+        <article>
+          <h3>Validate before output</h3>
+          <p>The whole input is checked before the first byte is written. Invalid XML never produces partial output.</p>
+        </article>
+        <article>
+          <h3>Instant terminal browser</h3>
+          <p><code>view</code> shows the first screen of a multi-GB file before EOF. Loading is demand-driven; folding, fuzzy search, copy and export included.</p>
+        </article>
+        <article>
+          <h3>XPath 3.1</h3>
+          <p>FontoXPath over an on-demand DOM in a worker, with heap and time budgets. Extract matches as standalone, namespace-complete XML.</p>
+        </article>
+        <article>
+          <h3>Streaming hooks</h3>
+          <p>Rename, rewrite or drop elements, attributes and text while formatting. Results are re-parsed so hooks cannot inject markup.</p>
+        </article>
+      </section>
+
+      <section class="code-grid">
+        <div>
+          <h2>CLI</h2>
+<pre class="code"><span class="c-gray"># format (validates first, never overwrites)</span>
+xml-stream-format huge.xml -o pretty.xml
+cat huge.xml | xml-stream-format --reindent
+
+<span class="c-gray"># extract XPath matches as XML</span>
+xml-stream-format extract huge.xml \
+  --xpath '//order[@status="returned"]'
+
+<span class="c-gray"># browse in the terminal</span>
+xml-stream-format view huge.xml</pre>
+        </div>
+        <div>
+          <h2>API</h2>
+<pre class="code"><span class="c-cyan">import</span> { createReadStream } <span class="c-cyan">from</span> <span class="c-green">'node:fs'</span>;
+<span class="c-cyan">import</span> { formatXml, openXml } <span class="c-cyan">from</span> <span class="c-green">'xml-stream-format'</span>;
+
+<span class="c-cyan">const</span> input = () =&gt; createReadStream(<span class="c-green">'in.xml'</span>);
+<span class="c-cyan">for await</span> (<span class="c-cyan">const</span> chunk <span class="c-cyan">of</span> formatXml(input()))
+  process.stdout.write(chunk);
+
+<span class="c-cyan">const</span> doc = <span class="c-cyan">await</span> openXml(input());
+<span class="c-cyan">const</span> [hit] = <span class="c-cyan">await</span> doc.select(<span class="c-green">'//order[1]'</span>);
+<span class="c-cyan">for await</span> (<span class="c-cyan">const</span> xml <span class="c-cyan">of</span> doc.extract(hit.xpath))
+  process.stdout.write(xml);
+<span class="c-cyan">await</span> doc.close();</pre>
+        </div>
+      </section>
+
+      <section class="bench">
+        <h2>Measured, end to end</h2>
+        <p class="muted">Real CLI runs to <code>/dev/null</code>, medians of three. Apple M3 Pro, Node 26.</p>
+        <table>
+          <thead>
+            <tr><th>Input</th><th>Time</th><th>Throughput</th><th>Peak RSS</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Repeated nodes, 64 MiB</td><td>1.5 s</td><td>41.5 MiB/s</td><td>114 MiB</td></tr>
+            <tr><td>Repeated nodes, 1 GiB</td><td>20.8 s</td><td>49.3 MiB/s</td><td>165 MiB</td></tr>
+            <tr><td>Single text node, 64 MiB</td><td>0.7 s</td><td>91.4 MiB/s</td><td>97 MiB</td></tr>
+            <tr><td>Terminal browser, 1.47 GB file</td><td>0.49 s</td><td colspan="2">to the first screen, after reading 64 KiB</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="demo-callout">
+        <div>
+          <h2>Try it on your own file</h2>
+          <p>The browser demo runs the library's decoder, Expat parser, ingest pipeline and formatter in Web Workers. Drop a multi-GB file — it is read lazily and never uploaded.</p>
+        </div>
+        <a class="button" href="./demo/">Open the demo →</a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>MIT · <a href="https://github.com/yinheli/xml-stream-format">yinheli/xml-stream-format</a></span>
+      <span class="muted">Expat &amp; FontoXPath are vendored with their licenses.</span>
+    </footer>
+  </body>
+</html>

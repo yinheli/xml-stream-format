@@ -1,0 +1,30 @@
+version: 2
+updates:
+  # Monthly npm dependency check: minor/patch batched into one PR,
+  # major versions get their own PR.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      # Types must match the oldest supported runtime (engines: Node 22).
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+    groups:
+      minor-and-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
+
+  # Keep GitHub Actions versions current.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+      include: scope

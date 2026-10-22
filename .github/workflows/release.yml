@@ -1,0 +1,109 @@
+name: Release
+
+# Pushing a vX.Y.Z tag (on master) is the whole release: the tag is the version,
+# git-cliff writes the notes, npm gets the package, GitHub gets the release.
+# A tag with a pre-release suffix (v1.2.0-beta.1) publishes to npm's `next` dist-tag.
+# Manual dispatch is a dry run that previews the next version, notes and package.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Build, test & release
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write # create the GitHub Release
+      id-token: write # npm provenance / trusted publishing (OIDC)
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the changelog needs full history and tags
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      # Trusted publishing requires npm >= 11.5.1; Node 22 bundles an older npm.
+      # One-time setup: on npmjs.com, package settings -> Trusted Publisher ->
+      # repo yinheli/xml-stream-format, workflow release.yml.
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@^11.5.1
+
+      - name: Install dependencies
+        run: npm ci --include=dev --ignore-scripts
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            tag="$GITHUB_REF_NAME"
+            git merge-base --is-ancestor "$GITHUB_SHA" origin/master \
+              || { echo "::error::$tag does not point to a commit on master"; exit 1; }
+          else
+            tag="$(npx git-cliff --bumped-version 2>/dev/null)"
+          fi
+          version="${tag#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::$tag is not a vMAJOR.MINOR.PATCH tag"; exit 1
+          fi
+          prerelease=false
+          [[ "$version" == *-* ]] && prerelease=true
+          {
+            echo "tag=$tag"
+            echo "version=$version"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      # Release notes for this tag only; the full CHANGELOG.md ships in the npm package.
+      - name: Generate changelog
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            npx git-cliff --current --strip all -o RELEASE_NOTES.md
+          else
+            npx git-cliff --unreleased --tag "$TAG" --strip all -o RELEASE_NOTES.md
+          fi
+          npx git-cliff --tag "$TAG" -o CHANGELOG.md
+          cat RELEASE_NOTES.md >> "$GITHUB_STEP_SUMMARY"
+
+      # The tag is the single source of truth for the published version.
+      - name: Set package version
+        run: npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --allow-same-version
+
+      - name: Publish (dry run)
+        if: github.event_name == 'workflow_dispatch'
+        run: npm publish --dry-run
+
+      - name: Publish to npm
+        if: github.event_name == 'push'
+        run: >-
+          npm publish --provenance --access public
+          --tag ${{ steps.version.outputs.prerelease == 'true' && 'next' || 'latest' }}
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          flags=()
+          [ "$PRERELEASE" = true ] && flags+=(--prerelease)
+          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file RELEASE_NOTES.md "${flags[@]}"

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "files": {
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/coverage",
+      "!**/vendor",
+      "!**/package-lock.json",
+      "!**/*.tgz",
+      "!**/*.tmp"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "suspicious": {
+        // Terminal protocols and XML separators (ESC, 0x1f, C0 ranges) are matched literally by design.
+        "noControlCharactersInRegex": "off"
+      },
+      "style": {
+        // The codebase pairs strict index access with deliberate non-null assertions.
+        "noNonNullAssertion": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/core/hooks.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            // Hook callbacks are typed `MaybePromise<void>`; void in that union is the intended API.
+            "noConfusingVoidType": "off"
+          }
+        }
+      }
+    }
+  ]
+}

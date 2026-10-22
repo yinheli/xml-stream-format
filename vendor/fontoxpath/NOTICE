@@ -1,0 +1,33 @@
+FontoXPath 3.34.0 (MIT)
+Source: https://registry.npmjs.org/fontoxpath/-/fontoxpath-3.34.0.tgz
+Integrity: sha512-7FgBQRohn4WR/2eVdYqZtKBFZkJNaiP4kGdfqS6bAg465og05ixGA2OgfMdxsO1mnX67+64JX/8JKclVqS+bzA==
+
+Integrity was checked before extracting the CommonJS runtime, public declarations,
+package metadata and LICENSE.md. The unused ESM bundle is not included.
+
+Controlled dictionary-only changes in dist/fontoxpath.js:
+  if(pg[a])return pg[a];
+becomes:
+  if(Object.hasOwn(pg,a))return pg[a];
+In inference context rh and its Yg scope creation, the initial and nested
+namespace/variable frames use Object.create(null) instead of {} (four further
+substitutions).
+In dynamic fontoxpath:evaluate (Qq), the variable identity dictionary changes:
+  Object.keys(e).reduce((n,t)=>{n[t]=t;return n},{})
+to:
+  Object.keys(e).reduce((n,t)=>{n[t]=t;return n},Object.create(null))
+This sixth dictionary-only change preserves legal external variable names such
+as __proto__ in nested evaluations. No other source is changed.
+
+The original predefined lookup and inference frames treat inherited properties
+such as constructor, __proto__ and toString as namespace/variable entries,
+bypassing the caller's resolver. These changes also cover dynamically constructed
+xs:QName values, without rewriting user XPath or string values. Parsing and
+evaluation algorithms are otherwise unchanged. No installed dependency is
+monkey-patched and no consumer install/build hook is needed. Direct runtime
+dependencies prsc 4.0.0 and xspattern 3.1.0 are pinned by the parent package.
+
+Patched dist/fontoxpath.js SHA-256:
+56b3703cfc953a858e12220a6348b4672a401a5033b084f4fff7d3ef43446eed
+The archive Integrity above identifies the unchanged upstream archive, not the
+patched runtime.

@@ -1,0 +1,7 @@
+node_modules/
+/dist/
+/coverage/
+*.tgz
+/site/dist/
+CHANGELOG.md
+RELEASE_NOTES.md

@@ -1,0 +1,13 @@
+expat-wasm 4.0.6
+Source: https://registry.npmjs.org/expat-wasm/-/expat-wasm-4.0.6.tgz
+Integrity: sha512-iG5XjV1X43rzROmMwy1cB8i0caczXJFiG2ufUTMNE0+Jj7yZvGE8/Zk/jCPuJltvqlq+I7EBixeKcPo9icnLNQ==
+
+The archive integrity was checked before extraction. The only source change is
+lib/index.js, _startElement: const attribs = {}; becomes
+const attribs = Object.create(null);. This preserves valid XML attributes named
+__proto__. No parsing algorithm or WASM binary was changed.
+
+The bundled runtime's public XmlParser.XML_ExpatVersion() returned expat_2.9.0
+in local verification. Wrapper and Expat licenses are retained in LICENSE and
+EXPAT-COPYING respectively. The Expat license text is from the pinned release:
+https://raw.githubusercontent.com/libexpat/libexpat/R_2_9_0/COPYING
